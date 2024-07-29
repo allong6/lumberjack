@@ -1,3 +1,3 @@
-module gopkg.in/allong6/lumberjack.v2
+module github.com/allong6/lumberjack
 
 go 1.13
