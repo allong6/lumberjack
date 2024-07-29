@@ -38,6 +38,7 @@ log.SetOutput(&lumberjack.Logger{
     MaxBackups: 3,
     MaxAge:     28, //days
     Compress:   true, // disabled by default
+	callback: func(filename string) {} // fork and add 
 })
 ```
 
@@ -75,7 +76,11 @@ type Logger struct {
     // Compress determines if the rotated log files should be compressed
     // using gzip. The default is not to perform compression.
     Compress bool `json:"compress" yaml:"compress"`
-    // contains filtered or unexported fields
+    // contains filtered or unexported fields    
+    
+    // callback Callback on rotation
+	// do during rotation executing
+	callback func(filename string) bool
 }
 ```
 Logger is an io.WriteCloser that writes to the specified filename.
