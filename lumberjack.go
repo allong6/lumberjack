@@ -107,9 +107,9 @@ type Logger struct {
 	// using gzip. The default is not to perform compression.
 	Compress bool `json:"compress" yaml:"compress"`
 
-	// callback Callback on rotation
+	// Callback Callback on rotation
 	// do during rotation executing
-	callback func(filename string) bool
+	Callback func(filename string) bool
 
 	size int64
 	file *os.File
@@ -201,8 +201,8 @@ func (l *Logger) rotate() error {
 		return err
 	}
 	continueFlag := true
-	if l.callback != nil {
-		continueFlag = l.callback(l.Filename)
+	if l.Callback != nil {
+		continueFlag = l.Callback(l.Filename)
 	}
 	if err := l.openNew(); err != nil { // Always do it.No matter what is returned by callback
 		return err
