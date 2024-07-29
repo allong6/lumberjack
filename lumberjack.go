@@ -3,7 +3,7 @@
 // Note that this is v2.0 of lumberjack, and should be imported using gopkg.in
 // thusly:
 //
-//   import "gopkg.in/natefinch/lumberjack.v2"
+//	import "gopkg.in/natefinch/lumberjack.v2"
 //
 // The package name remains simply lumberjack, and the code resides at
 // https://github.com/natefinch/lumberjack under the v2.0 branch.
@@ -66,7 +66,7 @@ var _ io.WriteCloser = (*Logger)(nil)
 // `/var/log/foo/server.log`, a backup created at 6:30pm on Nov 11 2016 would
 // use the filename `/var/log/foo/server-2016-11-04T18-30-00.000.log`
 //
-// Cleaning Up Old Log Files
+// # Cleaning Up Old Log Files
 //
 // Whenever a new logfile gets created, old log files may be deleted.  The most
 // recent files according to the encoded timestamp will be retained, up to a
@@ -106,6 +106,10 @@ type Logger struct {
 	// Compress determines if the rotated log files should be compressed
 	// using gzip. The default is not to perform compression.
 	Compress bool `json:"compress" yaml:"compress"`
+
+	// callback Callback on rotation
+	// do during rotation executing
+	callback func(filename string) bool
 
 	size int64
 	file *os.File
@@ -196,10 +200,16 @@ func (l *Logger) rotate() error {
 	if err := l.close(); err != nil {
 		return err
 	}
-	if err := l.openNew(); err != nil {
+	continueFlag := true
+	if l.callback != nil {
+		continueFlag = l.callback(l.Filename)
+	}
+	if err := l.openNew(); err != nil { // Always do it.No matter what is returned by callback
 		return err
 	}
-	l.mill()
+	if continueFlag { // maybe not need deal with the old log files anymore (including compression and clean)
+		l.mill()
+	}
 	return nil
 }
 
